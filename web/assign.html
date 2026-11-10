@@ -4,11 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>접수·배분 | A부 국회 요구자료</title>
+  <link rel="stylesheet" href="lib/tabulator.min.css">
   <style>
     :root{--navy:#18324a;--blue:#245f8d;--sky:#e7f1f7;--mint:#dff3ec;--green:#267258;--amber:#9c6416;--paper:#f5f7f8;--line:#dce3e8;--ink:#17212b;--muted:#647381;--white:#fff;--danger:#a63e3e}
     *{box-sizing:border-box}body{margin:0;font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;color:var(--ink);background:var(--paper)}button,input,select{font:inherit}.topbar{background:var(--navy);color:#fff;padding:14px clamp(18px,4vw,56px);display:flex;align-items:center;gap:22px;position:sticky;top:0;z-index:20}.brand{font-weight:800;margin-right:auto}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a,.nav button{border:0;border-radius:9px;padding:9px 13px;color:#eaf3f7;background:transparent;text-decoration:none}.nav a.active{background:#fff;color:var(--navy)}.nav button{opacity:.48;cursor:not-allowed}
     main{max-width:1500px;margin:0 auto;padding:34px 22px 70px}.heading{display:flex;align-items:end;gap:24px;margin-bottom:24px}.heading h1{margin:0;font-size:clamp(2rem,4vw,3.3rem);letter-spacing:-.05em}.heading p{color:var(--muted);margin:0 0 7px}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;margin:18px 0;box-shadow:0 12px 32px rgba(24,50,74,.05);overflow:hidden}.panel-head{display:flex;gap:16px;align-items:center;padding:20px 22px;border-bottom:1px solid var(--line)}.step{width:34px;height:34px;border-radius:10px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:900}.panel-head h2{margin:0;font-size:1.15rem}.panel-head p{margin:4px 0 0;color:var(--muted);font-size:.92rem}.actions{margin-left:auto;display:flex;gap:9px;flex-wrap:wrap}.file-button,.primary,.secondary,.danger,.confirm{border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:800;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}.file-button:active,.primary:active,.secondary:active,.danger:active,.confirm:active{transform:scale(.96)}.file-button{background:var(--sky);color:var(--blue);border:1px solid #bfd5e2}.file-button input{display:none}.primary{background:var(--blue);color:#fff;border:1px solid var(--blue)}.primary:disabled{opacity:.42;cursor:not-allowed}.secondary{background:#fff;border:1px solid var(--line);color:var(--navy)}.danger{background:#fff4f4;border:1px solid #e2bcbc;color:var(--danger)}.confirm{background:var(--mint);border:1px solid #a9d7c6;color:var(--green);padding:8px 11px}.statusbar{padding:11px 22px;background:#f8fafb;color:var(--muted);display:flex;justify-content:space-between;gap:18px}.statusbar.error{background:#fff0f0;color:var(--danger)}
-    .table-wrap{overflow:auto;max-height:580px}.preview-table{max-height:350px}table{width:100%;border-collapse:separate;border-spacing:0;font-size:.88rem}th{position:sticky;top:0;background:#eef3f5;color:#455765;text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);z-index:2;white-space:nowrap}td{padding:10px;border-bottom:1px solid #edf0f2;vertical-align:top}tbody tr:hover td{background:#fbfdfd}.request{min-width:320px;line-height:1.55}.subtext{color:var(--muted);font-size:.8rem;margin-top:5px}.badge{display:inline-flex;border-radius:999px;padding:5px 8px;font-size:.76rem;font-weight:800;background:#eef1f3;color:#5f6c75}.badge.confirmed{background:var(--mint);color:var(--green)}.candidates{min-width:220px}.candidate{display:block;margin-bottom:5px}.candidate b{color:var(--blue)}select{width:100%;border:1px solid #cbd5db;border-radius:8px;padding:7px;background:#fff;color:var(--ink)}select[multiple]{min-width:170px}.method{color:var(--muted);font-size:.78rem;margin-top:6px}.empty{padding:42px;text-align:center;color:var(--muted)}
+    .table-wrap{overflow:auto;max-height:580px}.preview-table{max-height:350px}.tabulator{border:0;background:#fff;font-size:.88rem}.tabulator .tabulator-header{border-bottom:1px solid var(--line);background:#eef3f5}.tabulator .tabulator-header .tabulator-col{background:#eef3f5;border-right:1px solid #e2e8eb}.tabulator-row{border-bottom:1px solid #edf0f2}.tabulator-row .tabulator-cell{border-right:1px solid #f0f2f4;padding:10px;white-space:normal}.tabulator-row:hover{background:#fbfdfd}.request{min-width:320px;line-height:1.55}.subtext{color:var(--muted);font-size:.8rem;margin-top:5px}.badge{display:inline-flex;border-radius:999px;padding:5px 8px;font-size:.76rem;font-weight:800;background:#eef1f3;color:#5f6c75}.badge.confirmed{background:var(--mint);color:var(--green)}.candidates{min-width:220px}.candidate{display:block;margin-bottom:5px}.candidate b{color:var(--blue)}select{width:100%;border:1px solid #cbd5db;border-radius:8px;padding:7px;background:#fff;color:var(--ink)}select[multiple]{min-width:170px}.method{color:var(--muted);font-size:.78rem;margin-top:6px}.empty{padding:42px;text-align:center;color:var(--muted)}.search-input{min-width:240px;border:1px solid #cbd5db;border-radius:10px;padding:10px 12px;background:#fff}.search-input:focus{outline:3px solid rgba(36,95,141,.14);border-color:var(--blue)}
     .loading{height:3px;background:linear-gradient(90deg,transparent,var(--blue),transparent);background-size:180% 100%;animation:loading 1s linear infinite;display:none}.loading.on{display:block}@keyframes loading{to{background-position:-180% 0}}
     [data-reveal]{opacity:0;transform:translateY(22px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}[data-reveal].show{opacity:1;transform:none}
     @media(max-width:900px){.topbar,.heading,.panel-head{align-items:flex-start;flex-direction:column}.brand,.actions{margin:0}.table-wrap{max-height:none}.heading p{margin:0}}
@@ -29,15 +30,18 @@
       <div class="table-wrap preview-table" id="previewWrap"><div class="empty">PDF나 문항목록 CSV를 선택하세요.</div></div>
     </section>
     <section class="panel" data-reveal>
-      <div class="panel-head"><div class="step">2</div><div><h2>문항별 배분</h2><p>1순위 후보가 기본 주관 과입니다. 수정하거나 협조 과를 함께 지정할 수 있습니다.</p></div><div class="actions"><button class="secondary" id="refreshButton" type="button">저장 자료 다시 읽기</button><button class="danger" id="resetButton" type="button">전체 초기화</button></div></div>
+      <div class="panel-head"><div class="step">2</div><div><h2>문항별 배분</h2><p>1순위 후보가 기본 주관 과입니다. 수정하거나 협조 과를 함께 지정할 수 있습니다.</p></div><div class="actions"><input class="search-input" id="similarSearch" type="search" placeholder="유사 문항 찾기" aria-label="유사 문항 찾기"><button class="secondary" id="refreshButton" type="button">저장 자료 다시 읽기</button><button class="danger" id="resetButton" type="button">전체 초기화</button></div></div>
       <div class="statusbar" id="assignStatus"><span>저장 문항 0건</span><span>배분확정 0건</span></div>
       <div class="table-wrap" id="assignmentWrap"><div class="empty">접수 등록된 문항이 없습니다.</div></div>
     </section>
   </main>
+  <script src="lib/papaparse.min.js"></script>
+  <script src="lib/tabulator.min.js"></script>
   <script src="common.js"></script>
   <script src="split.js"></script>
   <script src="engine.js"></script>
   <script type="module">
+    import Fuse from "./lib/fuse.min.mjs";
     import * as pdfjsLib from "./lib/pdf.min.mjs";
     pdfjsLib.GlobalWorkerOptions.workerSrc = new URL("./lib/pdf.worker.mjs", import.meta.url).href;
 
@@ -46,6 +50,7 @@
     const registerButton = document.querySelector("#registerButton");
     const refreshButton = document.querySelector("#refreshButton");
     const resetButton = document.querySelector("#resetButton");
+    const similarSearch = document.querySelector("#similarSearch");
     const previewWrap = document.querySelector("#previewWrap");
     const assignmentWrap = document.querySelector("#assignmentWrap");
     const intakeStatus = document.querySelector("#intakeStatus");
@@ -53,6 +58,9 @@
     const loadingBar = document.querySelector("#loadingBar");
     let stagedItems = [];
     let departments = [];
+    let previewTable = null;
+    let assignmentTable = null;
+    let assignmentFuse = null;
 
     const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[character]);
 
@@ -90,12 +98,29 @@
 
     function renderPreview() {
       registerButton.disabled = stagedItems.length === 0;
+      previewTable?.destroy();
+      previewTable = null;
       if (!stagedItems.length) {
         previewWrap.innerHTML = '<div class="empty">PDF나 문항목록 CSV를 선택하세요.</div>';
         return;
       }
-      const rows = stagedItems.map((item) => `<tr><td>${escapeHtml(item.파일명)}</td><td>${escapeHtml(item.위원회)}</td><td>${escapeHtml(item.의원)}</td><td>${item.문항번호}</td><td class="request">${escapeHtml(item.요구내용)}${item.세부항목 ? `<div class="subtext">${escapeHtml(item.세부항목)}</div>` : ""}${item.비고 ? `<div class="subtext">비고: ${escapeHtml(item.비고)}</div>` : ""}</td></tr>`).join("");
-      previewWrap.innerHTML = `<table><thead><tr><th>파일명</th><th>위원회</th><th>의원</th><th>번호</th><th>요구내용</th></tr></thead><tbody>${rows}</tbody></table>`;
+      previewWrap.innerHTML = "";
+      previewTable = new Tabulator(previewWrap, {
+        data: stagedItems,
+        height: "350px",
+        layout: "fitColumns",
+        placeholder: "불러온 문항이 없습니다.",
+        columns: [
+          { title: "파일명", field: "파일명", width: 180 },
+          { title: "위원회", field: "위원회", width: 130 },
+          { title: "의원", field: "의원", width: 100 },
+          { title: "번호", field: "문항번호", width: 75, sorter: "number" },
+          { title: "요구내용", field: "요구내용", minWidth: 380, formatter: (cell) => {
+            const item = cell.getRow().getData();
+            return `${escapeHtml(item.요구내용)}${item.세부항목 ? `<div class="subtext">${escapeHtml(item.세부항목)}</div>` : ""}${item.비고 ? `<div class="subtext">비고: ${escapeHtml(item.비고)}</div>` : ""}`;
+          } },
+        ],
+      });
     }
 
     function departmentOptions(selected, multiple = false) {
@@ -107,21 +132,79 @@
       const cases = AppCommon.loadCases();
       const confirmed = cases.filter((item) => item.상태 === "배분확정").length;
       assignStatus.innerHTML = `<span>저장 문항 ${cases.length}건</span><span>배분확정 ${confirmed}건</span>`;
+      assignmentTable?.destroy();
+      assignmentTable = null;
+      assignmentFuse = null;
       if (!cases.length) {
         assignmentWrap.innerHTML = '<div class="empty">접수 등록된 문항이 없습니다.</div>';
         return;
       }
-      const rows = cases.map((item) => {
-        const candidates = (item.후보 || []).map((candidate, index) => `<span class="candidate"><b>${index + 1}순위</b> ${escapeHtml(candidate.과)} · ${Number(candidate.점수).toFixed(1)} <small>${escapeHtml(candidate.근거키워드)}</small></span>`).join("") || "후보 없음";
-        const selected = item.주관과 || item.후보?.[0]?.과 || "";
-        return `<tr data-id="${escapeHtml(item.id)}"><td><span class="badge ${item.상태 === "배분확정" ? "confirmed" : ""}">${escapeHtml(item.상태)}</span></td><td>${escapeHtml(item.의원)} · ${item.문항번호}<div class="subtext">${escapeHtml(item.위원회)}</div></td><td class="request">${escapeHtml(item.요구내용)}${item.세부항목 ? `<div class="subtext">${escapeHtml(item.세부항목)}</div>` : ""}</td><td class="candidates">${candidates}</td><td><label>주관 과<select class="owner-select">${departmentOptions(selected)}</select></label><label class="subtext">협조 과<select class="support-select" multiple size="3">${departmentOptions("", true)}</select></label><div class="method">${item.확정방법 ? `최근 확정: ${escapeHtml(item.확정방법)}` : "미확정"}</div></td><td><button type="button" class="confirm">${item.상태 === "배분확정" ? "다시 확정" : "확정"}</button></td></tr>`;
-      }).join("");
-      assignmentWrap.innerHTML = `<table><thead><tr><th>상태</th><th>의원·문항</th><th>요구내용</th><th>후보 3순위</th><th>주관 과·협조 과</th><th>확정</th></tr></thead><tbody>${rows}</tbody></table>`;
-      cases.forEach((item) => {
-        const row = assignmentWrap.querySelector(`tr[data-id="${CSS.escape(item.id)}"]`);
-        const support = row.querySelector(".support-select");
-        [...support.options].forEach((option) => { option.selected = (item.협조과 || []).includes(option.value); });
+      assignmentWrap.innerHTML = "";
+      assignmentFuse = new Fuse(cases, {
+        keys: ["요구내용", "세부항목", "의원", "위원회"],
+        threshold: 0.34,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
       });
+      const initialQuery = similarSearch.value.trim();
+      const initialRows = initialQuery ? assignmentFuse.search(initialQuery).map((result) => result.item) : cases;
+      assignmentTable = new Tabulator(assignmentWrap, {
+        data: initialRows,
+        height: "580px",
+        layout: "fitColumns",
+        placeholder: "조건에 맞는 문항이 없습니다.",
+        columns: [
+          { title: "상태", field: "상태", width: 105, formatter: (cell) => `<span class="badge ${cell.getValue() === "배분확정" ? "confirmed" : ""}">${escapeHtml(cell.getValue())}</span>` },
+          { title: "의원·문항", field: "의원", width: 150, formatter: (cell) => {
+            const item = cell.getRow().getData();
+            return `${escapeHtml(item.의원)} · ${item.문항번호}<div class="subtext">${escapeHtml(item.위원회)}</div>`;
+          } },
+          { title: "요구내용", field: "요구내용", minWidth: 330, formatter: (cell) => {
+            const item = cell.getRow().getData();
+            return `${escapeHtml(item.요구내용)}${item.세부항목 ? `<div class="subtext">${escapeHtml(item.세부항목)}</div>` : ""}`;
+          } },
+          { title: "후보 3순위", field: "후보", minWidth: 220, formatter: (cell) => (cell.getValue() || []).map((candidate, index) => `<span class="candidate"><b>${index + 1}순위</b> ${escapeHtml(candidate.과)} · ${Number(candidate.점수).toFixed(1)} <small>${escapeHtml(candidate.근거키워드)}</small></span>`).join("") || "후보 없음" },
+          { title: "주관 과·협조 과", field: "주관과", minWidth: 220, formatter: (cell) => {
+            const item = cell.getRow().getData();
+            const selected = item.주관과 || item.후보?.[0]?.과 || "";
+            const options = departmentOptions(selected);
+            const supportOptions = departments.map((department) => `<option value="${escapeHtml(department)}" ${(item.협조과 || []).includes(department) ? "selected" : ""}>${escapeHtml(department)}</option>`).join("");
+            return `<label>주관 과<select class="owner-select">${options}</select></label><label class="subtext">협조 과<select class="support-select" multiple size="3">${supportOptions}</select></label><div class="method">${item.확정방법 ? `최근 확정: ${escapeHtml(item.확정방법)}` : "미확정"}</div>`;
+          } },
+          { title: "확정", field: "id", width: 95, headerSort: false, formatter: (cell) => `<button type="button" class="confirm">${cell.getRow().getData().상태 === "배분확정" ? "다시 확정" : "확정"}</button>`, cellClick: (_event, cell) => confirmAssignment(cell.getRow().getData().id, cell.getRow().getElement()) },
+        ],
+      });
+      if (initialQuery) {
+        const initialConfirmed = initialRows.filter((item) => item.상태 === "배분확정").length;
+        assignStatus.innerHTML = `<span>검색 결과 ${initialRows.length}건</span><span>배분확정 ${initialConfirmed}건</span>`;
+      }
+    }
+
+    function applySimilarSearch() {
+      if (!assignmentTable) return;
+      const query = similarSearch.value.trim();
+      const rows = query ? assignmentFuse.search(query).map((result) => result.item) : AppCommon.loadCases();
+      assignmentTable.replaceData(rows);
+      const confirmed = rows.filter((item) => item.상태 === "배분확정").length;
+      assignStatus.innerHTML = `<span>${query ? `검색 결과 ${rows.length}건` : `저장 문항 ${rows.length}건`}</span><span>배분확정 ${confirmed}건</span>`;
+    }
+
+    function confirmAssignment(itemId, rowElement) {
+      const cases = AppCommon.loadCases();
+      const item = cases.find((entry) => entry.id === itemId);
+      if (!item) return;
+      const owner = rowElement.querySelector(".owner-select").value;
+      if (!owner) { alert("주관 과를 선택하세요."); return; }
+      const support = [...rowElement.querySelector(".support-select").selectedOptions].map((option) => option.value).filter((department) => department !== owner);
+      const previousOwner = item.주관과 || "";
+      const method = owner === item.후보?.[0]?.과 ? "규칙" : "수정";
+      item.상태 = "배분확정";
+      item.주관과 = owner;
+      item.협조과 = support;
+      item.확정방법 = method;
+      item.배분이력 = [...(item.배분이력 || []), { 일시: new Date().toISOString(), 이전주관과: previousOwner, 주관과: owner, 협조과: support, 확정방법: method }];
+      AppCommon.saveCases(cases);
+      renderAssignments();
     }
 
     pdfInput.addEventListener("change", async () => {
@@ -180,27 +263,8 @@
       renderAssignments();
     });
 
-    assignmentWrap.addEventListener("click", (event) => {
-      const button = event.target.closest(".confirm");
-      if (!button) return;
-      const row = button.closest("tr");
-      const cases = AppCommon.loadCases();
-      const item = cases.find((entry) => entry.id === row.dataset.id);
-      const owner = row.querySelector(".owner-select").value;
-      if (!owner) { alert("주관 과를 선택하세요."); return; }
-      const support = [...row.querySelector(".support-select").selectedOptions].map((option) => option.value).filter((department) => department !== owner);
-      const previousOwner = item.주관과 || "";
-      const method = owner === item.후보?.[0]?.과 ? "규칙" : "수정";
-      item.상태 = "배분확정";
-      item.주관과 = owner;
-      item.협조과 = support;
-      item.확정방법 = method;
-      item.배분이력 = [...(item.배분이력 || []), { 일시: new Date().toISOString(), 이전주관과: previousOwner, 주관과: owner, 협조과: support, 확정방법: method }];
-      AppCommon.saveCases(cases);
-      renderAssignments();
-    });
-
     refreshButton.addEventListener("click", renderAssignments);
+    similarSearch.addEventListener("input", applySimilarSearch);
 
     resetButton.addEventListener("click", () => {
       const savedCount = AppCommon.loadCases().length;

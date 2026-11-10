@@ -38,6 +38,16 @@
   let engine = null;
 
   function parseCsv(text) {
+    if (typeof globalThis !== "undefined" && globalThis.Papa?.parse) {
+      const result = globalThis.Papa.parse(String(text).replace(/^\uFEFF/, ""), {
+        header: true,
+        skipEmptyLines: "greedy",
+        transformHeader: (header) => header.trim(),
+      });
+      if (result.errors.length) throw new Error(`CSV를 읽지 못했습니다: ${result.errors[0].message}`);
+      return result.data;
+    }
+
     const rows = [];
     let row = [];
     let field = "";

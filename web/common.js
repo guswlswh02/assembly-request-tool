@@ -2,6 +2,18 @@
   const STORAGE_KEY = "a-department-request-cases-v1";
 
   function parseCsv(text) {
+    if (root.Papa?.parse) {
+      const result = root.Papa.parse(String(text).replace(/^\uFEFF/, ""), {
+        header: true,
+        skipEmptyLines: "greedy",
+        transformHeader: (header) => header.trim(),
+      });
+      if (result.errors.length) {
+        throw new Error(`CSV를 읽지 못했습니다: ${result.errors[0].message}`);
+      }
+      return result.data;
+    }
+
     const source = String(text).replace(/^\uFEFF/, "");
     const rows = [];
     let row = [];
