@@ -1,0 +1,50 @@
+# 비밀정보와 로컬 환경
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# 의존성·캐시·임시 파일
+node_modules/
+__pycache__/
+*.py[cod]
+tmp/
+*.log
+.DS_Store
+Thumbs.db
+
+# 빌드·시험·생성 결과
+dist/
+build/
+coverage/
+output/
+outputs/
+result/
+results/
+결과/
+결과물/
+org.json
+rules_보강.csv
+data/문항목록.csv
+
+# 실제 업무 원문·접수대장·부서 회신
+원문/
+부서회신/
+지침재료/
+data/요구자료_접수대장_2026국감_520건.csv
+data/요구자료_접수대장_2026국감_520건.xlsx
+data/검증용_접수대장_120건.csv
+
+# 작성 문서와 스프레드시트 결과물
+*.hwpx
+*.xlsx
+*.pdf
+
+# 현재 도구와 무관한 개인 실습·참고 작업
+.contest_source/
+99.놀이/
+시스템개발/
+
+# 완성본 잠금 폴더는 열거나 배포하지 않음
+99_완성본_잠금/
