@@ -7,38 +7,60 @@
   <style>
     :root{--navy:#18324a;--blue:#245f8d;--mint:#dff3ec;--paper:#f5f7f8;--line:#dce3e8;--ink:#17212b;--muted:#647381;--white:#fff}
     *{box-sizing:border-box}body{margin:0;font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;color:var(--ink);background:linear-gradient(145deg,#eef3f5,#f9faf9 52%,#e8f2ee);min-height:100vh}
-    .topbar{background:var(--navy);color:#fff;padding:14px clamp(18px,4vw,56px);display:flex;align-items:center;gap:22px;position:sticky;top:0;z-index:10}.brand{font-weight:800;margin-right:auto}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a,.nav button{border:0;border-radius:9px;padding:9px 13px;color:#eaf3f7;background:transparent;font:inherit;text-decoration:none}.nav a.active{background:#fff;color:var(--navy)}.nav button{opacity:.48;cursor:not-allowed}
+    .topbar{background:var(--navy);color:#fff;padding:14px clamp(18px,4vw,56px);display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:10}.brand{font-weight:800;margin-right:auto}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a,.nav button{border:0;border-radius:9px;padding:9px 13px;color:#eaf3f7;background:transparent;font:inherit;text-decoration:none}.nav a.active{background:#fff;color:var(--navy)}.nav button{opacity:.48;cursor:not-allowed}.storage-mode{font-size:.78rem;padding:6px 9px;border-radius:999px;background:#ffffff18;border:1px solid #ffffff35;white-space:nowrap}.storage-mode[data-mode="server"]{background:#dff3ec;color:#174d3c;border-color:#9dd0bd}
     main{max-width:1180px;margin:0 auto;padding:64px 24px}.hero{display:grid;grid-template-columns:1.3fr .7fr;gap:28px;align-items:end}.eyebrow{color:var(--blue);font-weight:800;letter-spacing:.08em}.hero h1{font-size:clamp(2.3rem,6vw,5.2rem);line-height:1.02;margin:12px 0 20px;letter-spacing:-.06em}.hero p{font-size:1.08rem;color:var(--muted);line-height:1.8}.summary{background:rgba(255,255,255,.84);border:1px solid var(--line);border-radius:22px;padding:25px;box-shadow:0 20px 50px rgba(24,50,74,.08)}.summary strong{font-size:3rem;color:var(--blue)}
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px}.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px;min-height:190px;display:flex;flex-direction:column;transition:transform .45s cubic-bezier(.34,1.56,.64,1),border-color .2s}.card:hover{transform:translateY(-5px);border-color:#8fb8c9}.card .num{font-weight:900;color:#7d94a2}.card h2{margin:26px 0 8px}.card p{color:var(--muted);line-height:1.6;margin:0 0 20px}.card a{margin-top:auto;color:var(--blue);font-weight:800;text-decoration:none}.card.disabled{background:#f0f3f4;color:#83909a}.card.disabled:hover{transform:none}.card.disabled a{color:#9ba6ad}
     [data-reveal]{opacity:0;transform:translateY(24px);transition:opacity .65s cubic-bezier(.2,.7,.2,1),transform .65s cubic-bezier(.2,.7,.2,1)}[data-reveal].show{opacity:1;transform:none}
     @media(max-width:800px){.hero,.grid{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.brand{margin:0}.hero h1{font-size:3.2rem}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}[data-reveal]{opacity:1;transform:none}}
   </style>
+  <link rel="stylesheet" href="app.css">
 </head>
 <body>
   <header class="topbar">
     <div class="brand">A부 국회 요구자료</div>
     <nav class="nav" aria-label="주요 화면">
-      <a class="active" href="index.html">시작 화면</a><a href="assign.html">배분</a><button type="button" disabled>현업 회신 · S6</button><button type="button" disabled>취합 · S8</button>
+      <a class="active" href="index.html">시작 화면</a><a href="assign.html">배분</a><a href="dept.html">현업 회신</a><button type="button" disabled>취합 · S8</button>
     </nav>
+    <span class="storage-mode" id="storageMode"></span>
   </header>
   <main>
     <section class="hero" data-reveal>
       <div><div class="eyebrow">국회 총괄 담당 업무 화면</div><h1>요구서를 받고,<br>흐름을 놓치지 않습니다.</h1><p>자료요구서의 문항을 분리하고 소관 과 후보를 확인한 뒤, 사람이 주관 과와 협조 과를 확정합니다.</p></div>
-      <aside class="summary"><div>브라우저 저장 문항</div><strong id="caseCount">0</strong><div id="confirmedCount">배분확정 0건</div></aside>
+      <aside class="summary"><div id="summaryLabel">저장 문항</div><strong id="caseCount">0</strong><div id="confirmedCount">배분확정 0건</div></aside>
+    </section>
+    <section class="workflow-strip" data-reveal data-stagger aria-label="업무 처리 단계">
+      <div class="workflow-step on"><strong>01 접수·배분</strong><span>문항 분해와 담당 과 확정</span></div>
+      <div class="workflow-step on"><strong>02 현업 회신</strong><span>과별 회신과 재배정 요청</span></div>
+      <div class="workflow-step"><strong>03 취합·보완</strong><span>누락과 이상값 확인</span></div>
+      <div class="workflow-step"><strong>04 확정</strong><span>제출본 반영 여부 기록</span></div>
+    </section>
+    <section class="metric-grid" data-reveal data-stagger aria-label="처리 현황">
+      <div class="metric"><small>전체 문항</small><strong id="metricTotal">0</strong></div>
+      <div class="metric"><small>배분확정</small><strong id="metricAssigned">0</strong></div>
+      <div class="metric"><small>회신완료</small><strong id="metricReplied">0</strong></div>
+      <div class="metric attention"><small>재배정 요청</small><strong id="metricReassign">0</strong></div>
     </section>
     <section class="grid" data-reveal>
       <article class="card"><span class="num">01 · S5</span><h2>접수·배분</h2><p>PDF 또는 문항목록 CSV를 불러와 문항별 소관 과를 확정합니다.</p><a href="assign.html">배분 화면 열기 →</a></article>
-      <article class="card disabled"><span class="num">02 · S6</span><h2>현업 회신</h2><p>부서별 회신과 보완 요청을 관리하는 화면입니다.</p><a aria-disabled="true">다음 단계에서 제공</a></article>
+      <article class="card"><span class="num">02 · S6</span><h2>현업 회신</h2><p>내 과에 배분된 문항을 확인하고 회신 또는 재배정을 요청합니다.</p><a href="dept.html">현업 회신 화면 열기 →</a></article>
       <article class="card disabled"><span class="num">03 · S8</span><h2>취합</h2><p>확정된 회신의 누락과 이상값을 점검하고 취합합니다.</p><a aria-disabled="true">다음 단계에서 제공</a></article>
     </section>
   </main>
   <script src="common.js"></script>
   <script>
-    const cases = AppCommon.loadCases();
-    document.querySelector("#caseCount").textContent = cases.length;
-    document.querySelector("#confirmedCount").textContent = `배분확정 ${cases.filter((item) => item.상태 === "배분확정").length}건`;
-    AppCommon.initializeReveal();
+    (async function initialize() {
+      const { cases } = await AppCommon.loadDb();
+      document.querySelector("#caseCount").textContent = cases.length;
+      document.querySelector("#confirmedCount").textContent = `배분확정 ${cases.filter((item) => item.상태 === "배분확정").length}건`;
+      document.querySelector("#metricTotal").textContent = cases.length;
+      document.querySelector("#metricAssigned").textContent = cases.filter((item) => item.상태 === "배분확정").length;
+      document.querySelector("#metricReplied").textContent = cases.filter((item) => item.상태 === "회신완료").length;
+      document.querySelector("#metricReassign").textContent = cases.filter((item) => item.상태 === "재배정요청").length;
+      document.querySelector("#summaryLabel").textContent = AppCommon.storageLabel();
+      AppCommon.renderStorageMode();
+      AppCommon.initializeReveal();
+    })().catch((error) => { document.querySelector("#summaryLabel").textContent = error.message; });
   </script>
 </body>
 </html>

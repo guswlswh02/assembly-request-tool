@@ -1,0 +1,30 @@
+{
+  "departments": [
+    { "department": "기획재정담당관" },
+    { "department": "혁신행정담당관" },
+    { "department": "규제개혁법무담당관" },
+    { "department": "정보화담당관" },
+    { "department": "홍보담당관" },
+    { "department": "감사담당관" },
+    { "department": "운영지원과" },
+    { "department": "디지털정책과" },
+    { "department": "데이터정책과" },
+    { "department": "정보보호과" },
+    { "department": "공공서비스혁신과" },
+    { "department": "지역정책과" },
+    { "department": "지역개발과" },
+    { "department": "균형발전과" },
+    { "department": "지방재정협력과" },
+    { "department": "안전정책과" },
+    { "department": "재난대응과" },
+    { "department": "시설안전과" },
+    { "department": "기후위기대응과" },
+    { "department": "산업정책과" },
+    { "department": "중소기업지원과" },
+    { "department": "국제협력과" },
+    { "department": "통상협력과" },
+    { "department": "인재정책과" },
+    { "department": "교육훈련과" },
+    { "department": "고용지원과" }
+  ]
+}
