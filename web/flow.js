@@ -16,6 +16,8 @@
     requestReassignment: "requestReassignment", 재배정요청: "requestReassignment",
     requestSupplement: "requestSupplement", 보완요청: "requestSupplement",
     confirm: "confirm", 확정: "confirm",
+    excludeReply: "excludeReply", 회신제외: "excludeReply",
+    restoreReply: "restoreReply", 회신복구: "restoreReply",
   });
   const METHODS = Object.freeze({ rule: "규칙", 규칙: "규칙", ai: "AI", AI: "AI", manual: "수정", 수정: "수정" });
 
@@ -207,6 +209,33 @@
     return item;
   }
 
+  function changeReplyInclusion(db, request, departments, timestamp, excluded) {
+    const item = requireCase(db, cleanText(request.id));
+    const department = cleanText(first(request, "department", "과"));
+    const reason = cleanText(first(request, "reason", "사유"));
+    ensureDepartment(department, departments);
+    if (![item.주관과, ...(item.협조과 || [])].includes(department)) throw new FlowError(403, `${department}는 이 문항의 담당 과가 아닙니다.`);
+    const response = item.과별회신?.[department];
+    if (!response) throw new FlowError(400, `${department}의 회신이 없습니다.`);
+    if (excluded && !reason) throw new FlowError(400, "회신 제외에는 사유가 필요합니다.");
+    response.제출처리이력 ||= [];
+    response.제출처리이력.push({ 작업: excluded ? "제출본 제외" : "제출본 복구", 사유: reason, 일시: timestamp });
+    response.제출제외 = excluded;
+    if (excluded) response.제출제외사유 = reason;
+    if (!excluded) response.제출복구일시 = timestamp;
+    item.일시 = timestamp;
+    appendLog(db, excluded ? "회신제외" : "회신복구", item, department, timestamp);
+    return item;
+  }
+
+  function excludeReply(db, request, departments, timestamp) {
+    return changeReplyInclusion(db, request, departments, timestamp, true);
+  }
+
+  function restoreReply(db, request, departments, timestamp) {
+    return changeReplyInclusion(db, request, departments, timestamp, false);
+  }
+
   function apply(db, request, organization) {
     if (!request || typeof request !== "object" || Array.isArray(request)) throw new FlowError(400, "요청 본문은 객체여야 합니다.");
     const nextDb = normalizeDb(db);
@@ -214,7 +243,7 @@
     const action = ACTIONS[cleanText(first(request, "action", "작업"))];
     if (!action) throw new FlowError(400, "지원하지 않는 작업입니다.");
     const timestamp = new Date().toISOString();
-    const handlers = { receive, assign, respond, requestReassignment, requestSupplement, confirm };
+    const handlers = { receive, assign, respond, requestReassignment, requestSupplement, confirm, excludeReply, restoreReply };
     const item = handlers[action](nextDb, request, departments, timestamp);
     return { db: nextDb, item: copy(item) };
   }
