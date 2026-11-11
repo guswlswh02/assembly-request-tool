@@ -20,7 +20,7 @@
   <header class="topbar">
     <div class="brand">A부 국회 요구자료</div>
     <nav class="nav" aria-label="주요 화면">
-      <a class="active" href="index.html">시작 화면</a><a href="assign.html">배분</a><a href="dept.html">현업 회신</a><button type="button" disabled>취합 · S8</button>
+      <a class="active" href="index.html">시작 화면</a><a href="assign.html">배분</a><a href="dept.html">현업 회신</a><a href="collect.html">취합</a>
     </nav>
     <span class="storage-mode" id="storageMode"></span>
   </header>
@@ -32,8 +32,8 @@
     <section class="workflow-strip" data-reveal data-stagger aria-label="업무 처리 단계">
       <div class="workflow-step on"><strong>01 접수·배분</strong><span>문항 분해와 담당 과 확정</span></div>
       <div class="workflow-step on"><strong>02 현업 회신</strong><span>과별 회신과 재배정 요청</span></div>
-      <div class="workflow-step"><strong>03 취합·보완</strong><span>누락과 이상값 확인</span></div>
-      <div class="workflow-step"><strong>04 확정</strong><span>제출본 반영 여부 기록</span></div>
+      <div class="workflow-step on"><strong>03 취합·보완</strong><span>누락과 이상값 확인</span></div>
+      <div class="workflow-step on"><strong>04 확인 완료</strong><span>코멘트 기록과 제출본 생성</span></div>
     </section>
     <section class="metric-grid" data-reveal data-stagger aria-label="처리 현황">
       <div class="metric"><small>전체 문항</small><strong id="metricTotal">0</strong></div>
@@ -44,7 +44,7 @@
     <section class="grid" data-reveal>
       <article class="card"><span class="num">01 · S5</span><h2>접수·배분</h2><p>PDF 또는 문항목록 CSV를 불러와 문항별 소관 과를 확정합니다.</p><a href="assign.html">배분 화면 열기 →</a></article>
       <article class="card"><span class="num">02 · S6</span><h2>현업 회신</h2><p>내 과에 배분된 문항을 확인하고 회신 또는 재배정을 요청합니다.</p><a href="dept.html">현업 회신 화면 열기 →</a></article>
-      <article class="card disabled"><span class="num">03 · S8</span><h2>취합</h2><p>확정된 회신의 누락과 이상값을 점검하고 취합합니다.</p><a aria-disabled="true">다음 단계에서 제공</a></article>
+      <article class="card"><span class="num">03 · S8</span><h2>검사·취합</h2><p>회신과 접수대장을 점검하고 보완·확정한 뒤 제출본을 만듭니다.</p><a href="collect.html">취합 화면 열기 →</a></article>
     </section>
   </main>
   <script src="common.js"></script>

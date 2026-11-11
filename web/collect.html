@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>검사·취합 | A부 국회 요구자료</title>
+  <style>
+    :root{--navy:#18324a;--blue:#245f8d;--mint:#dff3ec;--green:#267258;--paper:#f5f7f8;--line:#dce3e8;--ink:#17212b;--muted:#647381;--danger:#a63e3e;--amber:#9c6416}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif}button,input,textarea{font:inherit}.topbar{background:var(--navy);color:#fff;padding:14px clamp(18px,4vw,56px);display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:20}.brand{font-weight:800;margin-right:auto}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a{border-radius:9px;padding:9px 13px;color:#eaf3f7;text-decoration:none}.nav a.active{background:#fff;color:var(--navy)}.storage-mode{font-size:.78rem;padding:6px 9px;border-radius:999px;background:#ffffff18;border:1px solid #ffffff35}
+    main{max-width:1500px;margin:auto;padding:36px 22px 72px}.heading{display:flex;justify-content:space-between;align-items:end;gap:24px}.heading h1{font-size:clamp(2rem,4vw,3.3rem);letter-spacing:-.05em;margin:0}.heading p{color:var(--muted);max-width:700px}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;margin:20px 0;overflow:hidden;box-shadow:0 12px 34px rgba(24,50,74,.06)}.panel-head{padding:20px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:15px}.panel-head h2{margin:0;font-size:1.12rem}.panel-head p{margin:4px 0 0;color:var(--muted)}.step{width:34px;height:34px;border-radius:10px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:900}.actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}.button,.file-button{border-radius:10px;padding:9px 13px;font-weight:800;cursor:pointer;border:1px solid #c6d2d8;background:#fff;color:var(--navy);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}.button:hover,.file-button:hover{transform:translateY(-1px)}.primary{background:var(--blue);border-color:var(--blue);color:#fff}.danger{background:#fff2f2;border-color:#e2baba;color:var(--danger)}.file-button input{display:none}.status-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:18px 22px}.metric{padding:14px;border:1px solid var(--line);border-radius:13px;background:#f9fbfb}.metric small{display:block;color:var(--muted);font-weight:800}.metric strong{display:block;margin-top:6px;font-size:1.6rem;color:var(--navy)}.table-wrap{overflow:auto;max-height:560px}.data-table{width:100%;border-collapse:collapse;font-size:.84rem}.data-table th,.data-table td{padding:10px;border:1px solid #e6ebee;text-align:left;vertical-align:top;white-space:nowrap}.data-table th{position:sticky;top:0;background:#edf3f1;color:#27444c;z-index:1}.issue{display:inline-block;color:var(--danger);background:#fff0ef;border-radius:7px;padding:3px 6px;margin:2px}.case-list{display:grid;gap:12px;padding:18px 22px}.case{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fbfcfc}.case-head{display:flex;align-items:start;gap:14px}.case h3{margin:0;font-size:1rem;line-height:1.5}.badge{margin-left:auto;border-radius:999px;padding:5px 8px;background:#edf1f0;font-size:.76rem;font-weight:800}.case-controls{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-top:12px}.case-controls textarea{min-height:62px;border:1px solid #c8d2d6;border-radius:9px;padding:9px}.chart-grid{display:grid;grid-template-columns:1fr 1.6fr;gap:18px;padding:20px}.chart-box{min-height:310px;border:1px solid var(--line);border-radius:14px;padding:16px}.registry-result{padding:0 22px 20px}.notice{padding:11px 13px;margin:16px 0;border-radius:10px;background:#eaf7f4;color:#225f52}.notice.error{background:#fff0ef;color:var(--danger)}.empty{padding:38px;text-align:center;color:var(--muted)}
+    @media(max-width:900px){.topbar,.heading,.panel-head{align-items:flex-start;flex-direction:column}.brand,.actions{margin:0}.status-grid{grid-template-columns:repeat(2,1fr)}.chart-grid{grid-template-columns:1fr}.case-controls{grid-template-columns:1fr}.nav{overflow:auto;flex-wrap:nowrap}.nav a{white-space:nowrap}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+  </style>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="topbar"><div class="brand">A부 국회 요구자료</div><span class="storage-mode" id="storageMode"></span><nav class="nav"><a href="index.html">시작 화면</a><a href="assign.html">배분</a><a href="dept.html">현업 회신</a><a class="active" href="collect.html">취합</a></nav></header>
+  <main>
+    <div class="heading"><div><h1>검사·취합</h1><p>과별 회신을 원본 그대로 합쳐 확인필요를 검토하고, 보완 또는 확인 완료를 기록한 뒤 제출본을 만듭니다.</p></div></div>
+    <div class="notice" id="notice" hidden></div>
+    <section class="panel"><div class="panel-head"><div class="step">1</div><div><h2>검사·확정</h2><p>회신과 확인필요를 문항별로 검토합니다.</p></div><div class="actions"><button class="button" id="refresh" type="button">새로고침</button></div></div><div class="table-wrap" id="combinedTable"></div><div class="case-list" id="caseList"></div></section>
+    <section class="panel"><div class="panel-head"><div class="step">2</div><div><h2>검증용 접수대장 점검</h2><p>조직도 밖 과, 기간·기한·날짜, 중복과 공백을 점검하며 원본 값은 바꾸지 않습니다.</p></div><div class="actions"><label class="file-button">CSV 선택<input id="registryFile" type="file" accept=".csv,text/csv"></label></div></div><div class="registry-result" id="registryResult"><div class="empty">검증용 접수대장 CSV를 선택하세요.</div></div></section>
+    <section class="panel"><div class="panel-head"><div class="step">3</div><div><h2>현황·제출본</h2><p>상태와 과별 업무량을 확인하고 확정 문항만 제출본으로 내려받습니다.</p></div><div class="actions"><button class="button primary" id="exportExcel" type="button">제출본 엑셀</button><button class="button" id="exportMarkdown" type="button">제출본 Markdown</button></div></div><div class="status-grid" id="statusGrid"></div><div class="chart-grid"><div class="chart-box"><canvas id="statusChart"></canvas></div><div class="chart-box"><canvas id="departmentChart"></canvas></div></div></section>
+  </main>
+  <script src="lib/papaparse.min.js"></script>
+  <script src="lib/xlsx.full.min.js"></script>
+  <script src="lib/chart.umd.min.js"></script>
+  <script src="common.js"></script>
+  <script src="flow.js"></script>
+  <script src="validate.js"></script>
+  <script>
+    const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[character]);
+    const notice = document.querySelector("#notice");
+    const combinedTable = document.querySelector("#combinedTable");
+    const caseList = document.querySelector("#caseList");
+    const statusGrid = document.querySelector("#statusGrid");
+    const registryResult = document.querySelector("#registryResult");
+    let db = { cases: [], log: [] }, departments = [], organization = [], statusChart, departmentChart;
+    function showNotice(message, error = false) { notice.hidden = !message; notice.textContent = message; notice.classList.toggle("error", error); }
+    function combinedRows(cases = db.cases) {
+      return cases.flatMap((item) => Object.entries(item.과별회신 || {}).flatMap(([department, response]) => {
+        const rows = response.행?.length ? response.행 : [{ 메모: response.메모 || "" }];
+        return rows.map((row) => ({ 문항ID: item.id, 의원문항: `${item.의원 || ""} ${item.문항번호 || ""}`.trim(), 요구내용: item.요구내용, 회신과: department, ...row, 확인필요: (response.확인필요 || []).map((entry) => entry.내용 || entry).join(" / ") }));
+      }));
+    }
+    function renderCombined() {
+      const rows = combinedRows();
+      if (!rows.length) { combinedTable.innerHTML = '<div class="empty">제출된 회신이 없습니다.</div>'; return; }
+      const preferred = ["문항ID", "의원문항", "요구내용", "회신과"];
+      const columns = [...preferred, ...new Set(rows.flatMap(Object.keys).filter((key) => !preferred.includes(key) && key !== "확인필요")), "확인필요"];
+      combinedTable.innerHTML = `<table class="data-table"><thead><tr>${columns.map((key) => `<th>${escapeHtml(key)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${columns.map((key) => `<td>${key === "확인필요" && row[key] ? `<span class="issue">${escapeHtml(row[key])}</span>` : escapeHtml(row[key])}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    }
+    function renderCases() {
+      const items = db.cases.filter((item) => ["회신중", "회신완료", "보완요청", "확정"].includes(item.상태));
+      caseList.innerHTML = items.length ? items.map((item) => {
+        const replies = Object.entries(item.과별회신 || {});
+        const issues = replies.flatMap(([department, response]) => (response.확인필요 || []).map((entry) => `${department}: ${entry.내용 || entry}`));
+        const supplementOptions = replies.map(([department]) => `<option>${escapeHtml(department)}</option>`).join("");
+        return `<article class="case" data-id="${escapeHtml(item.id)}"><div class="case-head"><div><h3>${escapeHtml(item.의원)} ${escapeHtml(item.문항번호)}번 · ${escapeHtml(item.요구내용)}</h3><div class="meta">회신 ${replies.length}/${1 + (item.협조과 || []).length}과${issues.length ? ` · 확인필요 ${issues.length}건` : ""}</div>${issues.map((value) => `<span class="issue">${escapeHtml(value)}</span>`).join("")}</div><span class="badge">${escapeHtml(item.상태)}</span></div><div class="case-controls"><textarea class="comment" placeholder="보완 사유 또는 확정 코멘트">${escapeHtml(item.확정코멘트 || "")}</textarea><select class="supplement-department"><option value="">회신 과 선택</option>${supplementOptions}</select><button class="button danger supplement" type="button" ${["회신중","회신완료"].includes(item.상태) ? "" : "disabled"}>보완요청</button><span></span><span></span><button class="button primary confirm-case" type="button" ${item.상태 === "회신완료" ? "" : "disabled"}>확인 완료</button></div></article>`;
+      }).join("") : '<div class="empty">검토할 회신 문항이 없습니다.</div>';
+    }
+    function renderStatus() {
+      const names = ["접수", "배분확정", "회신중", "회신완료", "보완요청", "확정"];
+      const counts = names.map((name) => db.cases.filter((item) => item.상태 === name).length);
+      statusGrid.innerHTML = names.map((name, index) => `<div class="metric"><small>${name}</small><strong>${counts[index]}</strong></div>`).join("");
+      const departmentCounts = new Map(); db.cases.forEach((item) => [item.주관과, ...(item.협조과 || [])].filter(Boolean).forEach((name) => departmentCounts.set(name, (departmentCounts.get(name) || 0) + 1)));
+      statusChart?.destroy(); departmentChart?.destroy();
+      statusChart = new Chart(document.querySelector("#statusChart"), { type: "doughnut", data: { labels: names, datasets: [{ data: counts, backgroundColor: ["#94a3b8","#2f718f","#5c91a8","#45a58b","#d38b42","#194f42"] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: "상태별 문항" } } } });
+      const sorted = [...departmentCounts.entries()].sort((a,b) => b[1]-a[1]);
+      departmentChart = new Chart(document.querySelector("#departmentChart"), { type: "bar", data: { labels: sorted.map(([name]) => name), datasets: [{ label: "배분 문항", data: sorted.map(([,count]) => count), backgroundColor: "#4c8d91" }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: "y", plugins: { title: { display: true, text: "과별 배분 현황" }, legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } } });
+    }
+    async function refresh() { db = await AppCommon.loadDb(); renderCombined(); renderCases(); renderStatus(); }
+    caseList.addEventListener("click", async (event) => {
+      const card = event.target.closest(".case"); if (!card) return;
+      const comment = card.querySelector(".comment").value.trim();
+      try {
+        if (event.target.matches(".supplement")) {
+          const department = card.querySelector(".supplement-department").value;
+          if (!department) throw new Error("보완을 요청할 과를 선택하세요.");
+          await AppCommon.applyAction({ 작업: "보완요청", id: card.dataset.id, 과: department, 사유: comment }, organization);
+          showNotice(`${department}에 보완을 요청했습니다.`);
+        } else if (event.target.matches(".confirm-case")) {
+          await AppCommon.applyAction({ 작업: "확정", id: card.dataset.id, 코멘트: comment }, organization);
+          showNotice("확인 완료로 확정했습니다.");
+        } else return;
+        await refresh();
+      } catch (error) { showNotice(error.message, true); }
+    });
+    document.querySelector("#registryFile").addEventListener("change", async (event) => {
+      const file = event.target.files[0]; if (!file) return;
+      try {
+        const rows = AppCommon.parseCsv(await file.text());
+        const result = RequestValidator.validateRegistry(rows, departments);
+        registryResult.innerHTML = `<div class="notice ${result.확인필요.length ? "error" : ""}">${file.name} · ${rows.length}행 · 확인필요 ${result.확인필요.length}건</div>${result.확인필요.length ? `<table class="data-table"><thead><tr><th>행</th><th>종류</th><th>열</th><th>내용</th></tr></thead><tbody>${result.확인필요.map((entry) => `<tr><td>${entry.행 || ""}</td><td>${escapeHtml(entry.종류)}</td><td>${escapeHtml(entry.열 || "")}</td><td>${escapeHtml(entry.내용)}</td></tr>`).join("")}</tbody></table>` : ""}`;
+      } catch (error) { registryResult.innerHTML = `<div class="notice error">${escapeHtml(error.message)}</div>`; }
+    });
+    function confirmedCases() { return db.cases.filter((item) => item.상태 === "확정"); }
+    document.querySelector("#exportExcel").addEventListener("click", () => {
+      const cases = confirmedCases(); if (!cases.length) { showNotice("확정된 문항이 없습니다.", true); return; }
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(cases.map((item) => ({ 문항ID:item.id,위원회:item.위원회,의원:item.의원,문항번호:item.문항번호,요구내용:item.요구내용,주관과:item.주관과,협조과:(item.협조과||[]).join("|"),확정코멘트:item.확정코멘트 }))), "제출목록");
+      const used = new Set(["제출목록"]); cases.forEach((item, index) => { let name=`${index+1}_${item.의원||"문항"}_${item.문항번호||""}`.replace(/[\\/?*:[\]]/g,"_").slice(0,31); while(used.has(name)) name=`${name.slice(0,27)}_${used.size}`; used.add(name); XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(combinedRows([item])), name); });
+      XLSX.writeFile(workbook, "국회요구자료_제출본.xlsx");
+    });
+    document.querySelector("#exportMarkdown").addEventListener("click", () => {
+      const cases = confirmedCases(); if (!cases.length) { showNotice("확정된 문항이 없습니다.", true); return; }
+      const lines=["# 국회 요구자료 제출본",""]; cases.forEach((item,index)=>{ lines.push(`## ${index+1}. ${item.의원||""} ${item.문항번호||""}번`,"",item.요구내용,"",`- 주관 과: ${item.주관과}`,`- 협조 과: ${(item.협조과||[]).join(", ")||"없음"}`,`- 확인 코멘트: ${item.확정코멘트}`,""); const rows=combinedRows([item]); if(rows.length){const keys=[...new Set(rows.flatMap(Object.keys))];lines.push(`| ${keys.join(" | ")} |`,`| ${keys.map(()=>"---").join(" | ")} |`,...rows.map(row=>`| ${keys.map(key=>String(row[key]??"").replace(/\|/g,"\\|").replace(/\n/g," ")).join(" | ")} |`),"");}}); const blob=new Blob(["\uFEFF"+lines.join("\n")],{type:"text/markdown;charset=utf-8"}); const link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download="국회요구자료_제출본.md";link.click();URL.revokeObjectURL(link.href);
+    });
+    document.querySelector("#refresh").addEventListener("click",()=>refresh().catch((error)=>showNotice(error.message,true)));
+    (async function initialize(){departments=(await AppCommon.loadCsv("data/A부_조직도_26개과.csv")).map((row)=>row.과);organization=departments.map((과)=>({과}));AppCommon.renderStorageMode();await refresh();})().catch((error)=>showNotice(error.message,true));
+  </script>
+</body>
+</html>

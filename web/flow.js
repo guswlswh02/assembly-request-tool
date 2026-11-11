@@ -8,11 +8,14 @@
   const STATUS = Object.freeze({
     RECEIVED: "접수", ASSIGNED: "배분확정", RESPONDING: "회신중",
     REPLIED: "회신완료", REASSIGNMENT_REQUESTED: "재배정요청",
+    SUPPLEMENT_REQUESTED: "보완요청", CONFIRMED: "확정",
   });
   const ACTIONS = Object.freeze({
     receive: "receive", 접수: "receive", assign: "assign", 배분: "assign",
     respond: "respond", 회신: "respond",
     requestReassignment: "requestReassignment", 재배정요청: "requestReassignment",
+    requestSupplement: "requestSupplement", 보완요청: "requestSupplement",
+    confirm: "confirm", 확정: "confirm",
   });
   const METHODS = Object.freeze({ rule: "규칙", 규칙: "규칙", ai: "AI", AI: "AI", manual: "수정", 수정: "수정" });
 
@@ -93,7 +96,7 @@
       세부항목: cleanText(first(request, "subItems", "세부항목")), 비고: cleanText(first(request, "note", "비고")),
       상태: STATUS.RECEIVED, 주관과: "", 협조과: [], 확정방법: "",
       후보: normalizeCandidates(first(request, "candidates", "후보"), departments),
-      과별회신: {}, 재배정: [], 일시: timestamp,
+      과별회신: {}, 회신이력: [], 재배정: [], 보완: [], 확정코멘트: "", 일시: timestamp,
     };
     db.cases.push(item);
     appendLog(db, "접수", item, "", timestamp);
@@ -123,11 +126,15 @@
 
   function respond(db, request, departments, timestamp) {
     const item = requireCase(db, cleanText(request.id));
-    assertStatus(item, [STATUS.ASSIGNED, STATUS.RESPONDING], "회신");
+    assertStatus(item, [STATUS.ASSIGNED, STATUS.RESPONDING, STATUS.SUPPLEMENT_REQUESTED], "회신");
     const department = cleanText(first(request, "department", "과"));
     ensureDepartment(department, departments);
     const assigned = new Set([item.주관과, ...(item.협조과 || [])]);
     if (!assigned.has(department)) throw new FlowError(403, `${department}는 이 문항의 담당 과가 아닙니다.`);
+    const pendingSupplement = [...(item.보완 || [])].reverse().find((entry) => !entry.해결);
+    if (item.상태 === STATUS.SUPPLEMENT_REQUESTED && pendingSupplement?.과 !== department) {
+      throw new FlowError(403, `${department}는 현재 보완요청을 받은 과가 아닙니다.`);
+    }
     const response = {};
     const fileName = cleanText(first(request, "fileName", "파일명"));
     const memo = cleanText(first(request, "memo", "메모"));
@@ -139,7 +146,13 @@
     if (Array.isArray(issues)) response.확인필요 = copy(issues);
     if (!fileName && !memo && !Array.isArray(rows)) throw new FlowError(400, "회신에는 파일명, 행 또는 메모가 필요합니다.");
     response.일시 = timestamp;
+    item.회신이력 ||= [];
+    if (item.과별회신[department]) item.회신이력.push({ 과: department, ...copy(item.과별회신[department]), 대체일시: timestamp });
     item.과별회신[department] = response;
+    if (pendingSupplement?.과 === department) {
+      pendingSupplement.해결 = true;
+      pendingSupplement.회신일시 = timestamp;
+    }
     item.상태 = [...assigned].every((name) => item.과별회신[name]) ? STATUS.REPLIED : STATUS.RESPONDING;
     item.일시 = timestamp;
     appendLog(db, "회신", item, department, timestamp);
@@ -148,7 +161,7 @@
 
   function requestReassignment(db, request, departments, timestamp) {
     const item = requireCase(db, cleanText(request.id));
-    assertStatus(item, [STATUS.ASSIGNED, STATUS.RESPONDING], "재배정요청");
+    assertStatus(item, [STATUS.ASSIGNED, STATUS.RESPONDING, STATUS.SUPPLEMENT_REQUESTED], "재배정요청");
     const department = cleanText(first(request, "department", "과"));
     const reason = cleanText(first(request, "reason", "사유"));
     const preferred = cleanText(first(request, "preferredDepartment", "희망과"));
@@ -165,6 +178,35 @@
     return item;
   }
 
+  function requestSupplement(db, request, departments, timestamp) {
+    const item = requireCase(db, cleanText(request.id));
+    assertStatus(item, [STATUS.RESPONDING, STATUS.REPLIED], "보완요청");
+    const department = cleanText(first(request, "department", "과"));
+    const reason = cleanText(first(request, "reason", "사유"));
+    ensureDepartment(department, departments);
+    if (![item.주관과, ...(item.협조과 || [])].includes(department)) throw new FlowError(403, `${department}는 이 문항의 담당 과가 아닙니다.`);
+    if (!item.과별회신?.[department]) throw new FlowError(400, `${department}의 기존 회신이 없어 보완을 요청할 수 없습니다.`);
+    if (!reason) throw new FlowError(400, "보완요청에는 사유가 필요합니다.");
+    item.보완 ||= [];
+    item.보완.push({ 과: department, 사유: reason, 일시: timestamp, 해결: false });
+    item.상태 = STATUS.SUPPLEMENT_REQUESTED;
+    item.일시 = timestamp;
+    appendLog(db, "보완요청", item, department, timestamp);
+    return item;
+  }
+
+  function confirm(db, request, _departments, timestamp) {
+    const item = requireCase(db, cleanText(request.id));
+    assertStatus(item, [STATUS.REPLIED], "확정");
+    const comment = cleanText(first(request, "comment", "코멘트", "확정코멘트"));
+    if (!comment) throw new FlowError(400, "확정에는 코멘트가 필요합니다.");
+    item.확정코멘트 = comment;
+    item.상태 = STATUS.CONFIRMED;
+    item.일시 = timestamp;
+    appendLog(db, "확정", item, "", timestamp);
+    return item;
+  }
+
   function apply(db, request, organization) {
     if (!request || typeof request !== "object" || Array.isArray(request)) throw new FlowError(400, "요청 본문은 객체여야 합니다.");
     const nextDb = normalizeDb(db);
@@ -172,7 +214,7 @@
     const action = ACTIONS[cleanText(first(request, "action", "작업"))];
     if (!action) throw new FlowError(400, "지원하지 않는 작업입니다.");
     const timestamp = new Date().toISOString();
-    const handlers = { receive, assign, respond, requestReassignment };
+    const handlers = { receive, assign, respond, requestReassignment, requestSupplement, confirm };
     const item = handlers[action](nextDb, request, departments, timestamp);
     return { db: nextDb, item: copy(item) };
   }

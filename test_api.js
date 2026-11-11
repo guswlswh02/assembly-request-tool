@@ -86,6 +86,26 @@ async function main() {
   await check("순서 밖 재배정", "POST", {
     작업: "재배정요청", id: "TEST-01", 과: "디지털정책과", 사유: "소관 아님",
   }, 409);
+  await check("사유 없는 보완요청", "POST", {
+    작업: "보완요청", id: "TEST-01", 과: "운영지원과",
+  }, 400);
+  const supplement = await check("정상 보완요청", "POST", {
+    작업: "보완요청", id: "TEST-01", 과: "운영지원과", 사유: "합계 확인 필요",
+  }, 200);
+  assert.equal(supplement.body.상태, "보완요청");
+  await check("보완 대상 아닌 과 회신", "POST", {
+    작업: "회신", id: "TEST-01", 과: "디지털정책과", 메모: "재회신",
+  }, 403);
+  const supplemented = await check("보완 회신", "POST", {
+    작업: "회신", id: "TEST-01", 과: "운영지원과", 메모: "합계 수정 회신",
+  }, 200);
+  assert.equal(supplemented.body.상태, "회신완료");
+  assert.equal(supplemented.body.문항.회신이력.length, 1);
+  assert.equal(supplemented.body.문항.회신이력[0].메모, "해당 없음");
+  await check("코멘트 없는 확정", "POST", { 작업: "확정", id: "TEST-01" }, 400);
+  const confirmed = await check("정상 확정", "POST", { 작업: "확정", id: "TEST-01", 코멘트: "확인 완료" }, 200);
+  assert.equal(confirmed.body.상태, "확정");
+  assert.equal(confirmed.body.문항.확정코멘트, "확인 완료");
 
   await check("두 번째 접수", "POST", { 작업: "접수", id: "TEST-02", 요구내용: "안전점검 현황" }, 200);
   await check("두 번째 배분", "POST", {
@@ -102,8 +122,8 @@ async function main() {
   }, 200);
   assert.equal(reassigned.body.상태, "재배정요청");
   assert.equal(store.db.cases.length, 2);
-  assert.equal(store.db.log.length, 7);
-  assert.equal(store.saveCount, 7);
+  assert.equal(store.db.log.length, 10);
+  assert.equal(store.saveCount, 10);
 
   const aiRequests = [];
   const aiNormal = createApp({
@@ -159,7 +179,7 @@ async function main() {
   assert.match(noKey.body.error, /OPENAI_API_KEY/);
   results.push({ 시험: "AI 키 누락 안내", 예상: 500, 결과: 500, 판정: "통과" });
 
-  assert.equal(store.saveCount, 7, "AI 추천은 cases.json을 저장하지 않아야 합니다.");
+  assert.equal(store.saveCount, 10, "AI 추천은 cases.json을 저장하지 않아야 합니다.");
 
   console.table(results);
   console.log(`결과: ${results.length}개 시험 모두 통과 · 저장 ${store.saveCount}회 · 문항 ${store.db.cases.length}건`);
