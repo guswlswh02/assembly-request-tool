@@ -16,8 +16,6 @@
     requestReassignment: "requestReassignment", 재배정요청: "requestReassignment",
     requestSupplement: "requestSupplement", 보완요청: "requestSupplement",
     confirm: "confirm", 확정: "confirm",
-    excludeReply: "excludeReply", 회신제외: "excludeReply",
-    restoreReply: "restoreReply", 회신복구: "restoreReply",
   });
   const METHODS = Object.freeze({ rule: "규칙", 규칙: "규칙", ai: "AI", AI: "AI", manual: "수정", 수정: "수정" });
 
@@ -98,7 +96,8 @@
       세부항목: cleanText(first(request, "subItems", "세부항목")), 비고: cleanText(first(request, "note", "비고")),
       상태: STATUS.RECEIVED, 주관과: "", 협조과: [], 확정방법: "",
       후보: normalizeCandidates(first(request, "candidates", "후보"), departments),
-      과별회신: {}, 회신이력: [], 재배정: [], 보완: [], 확정코멘트: "", 일시: timestamp,
+      과별회신: {}, 회신이력: [], 재배정: [], 보완: [], 확정코멘트: "",
+      확정이력: [], 확정해제이력: [], 일시: timestamp,
     };
     db.cases.push(item);
     appendLog(db, "접수", item, "", timestamp);
@@ -182,13 +181,17 @@
 
   function requestSupplement(db, request, departments, timestamp) {
     const item = requireCase(db, cleanText(request.id));
-    assertStatus(item, [STATUS.RESPONDING, STATUS.REPLIED], "보완요청");
+    assertStatus(item, [STATUS.RESPONDING, STATUS.REPLIED, STATUS.CONFIRMED], "보완요청");
     const department = cleanText(first(request, "department", "과"));
     const reason = cleanText(first(request, "reason", "사유"));
     ensureDepartment(department, departments);
     if (![item.주관과, ...(item.협조과 || [])].includes(department)) throw new FlowError(403, `${department}는 이 문항의 담당 과가 아닙니다.`);
     if (!item.과별회신?.[department]) throw new FlowError(400, `${department}의 기존 회신이 없어 보완을 요청할 수 없습니다.`);
     if (!reason) throw new FlowError(400, "보완요청에는 사유가 필요합니다.");
+    if (item.상태 === STATUS.CONFIRMED) {
+      item.확정해제이력 ||= [];
+      item.확정해제이력.push({ 과: department, 사유: reason, 이전코멘트: cleanText(item.확정코멘트), 일시: timestamp });
+    }
     item.보완 ||= [];
     item.보완.push({ 과: department, 사유: reason, 일시: timestamp, 해결: false });
     item.상태 = STATUS.SUPPLEMENT_REQUESTED;
@@ -202,38 +205,13 @@
     assertStatus(item, [STATUS.REPLIED], "확정");
     const comment = cleanText(first(request, "comment", "코멘트", "확정코멘트"));
     if (!comment) throw new FlowError(400, "확정에는 코멘트가 필요합니다.");
+    item.확정이력 ||= [];
+    item.확정이력.push({ 코멘트: comment, 일시: timestamp });
     item.확정코멘트 = comment;
     item.상태 = STATUS.CONFIRMED;
     item.일시 = timestamp;
     appendLog(db, "확정", item, "", timestamp);
     return item;
-  }
-
-  function changeReplyInclusion(db, request, departments, timestamp, excluded) {
-    const item = requireCase(db, cleanText(request.id));
-    const department = cleanText(first(request, "department", "과"));
-    const reason = cleanText(first(request, "reason", "사유"));
-    ensureDepartment(department, departments);
-    if (![item.주관과, ...(item.협조과 || [])].includes(department)) throw new FlowError(403, `${department}는 이 문항의 담당 과가 아닙니다.`);
-    const response = item.과별회신?.[department];
-    if (!response) throw new FlowError(400, `${department}의 회신이 없습니다.`);
-    if (excluded && !reason) throw new FlowError(400, "회신 제외에는 사유가 필요합니다.");
-    response.제출처리이력 ||= [];
-    response.제출처리이력.push({ 작업: excluded ? "제출본 제외" : "제출본 복구", 사유: reason, 일시: timestamp });
-    response.제출제외 = excluded;
-    if (excluded) response.제출제외사유 = reason;
-    if (!excluded) response.제출복구일시 = timestamp;
-    item.일시 = timestamp;
-    appendLog(db, excluded ? "회신제외" : "회신복구", item, department, timestamp);
-    return item;
-  }
-
-  function excludeReply(db, request, departments, timestamp) {
-    return changeReplyInclusion(db, request, departments, timestamp, true);
-  }
-
-  function restoreReply(db, request, departments, timestamp) {
-    return changeReplyInclusion(db, request, departments, timestamp, false);
   }
 
   function apply(db, request, organization) {
@@ -243,7 +221,7 @@
     const action = ACTIONS[cleanText(first(request, "action", "작업"))];
     if (!action) throw new FlowError(400, "지원하지 않는 작업입니다.");
     const timestamp = new Date().toISOString();
-    const handlers = { receive, assign, respond, requestReassignment, requestSupplement, confirm, excludeReply, restoreReply };
+    const handlers = { receive, assign, respond, requestReassignment, requestSupplement, confirm };
     const item = handlers[action](nextDb, request, departments, timestamp);
     return { db: nextDb, item: copy(item) };
   }

@@ -37,7 +37,7 @@
     let db = { cases: [], log: [] }, departments = [], organization = [], statusChart, departmentChart;
     function showNotice(message, error = false) { notice.hidden = !message; notice.textContent = message; notice.classList.toggle("error", error); }
     function combinedRows(cases = db.cases) {
-      return cases.flatMap((item) => Object.entries(item.과별회신 || {}).filter(([, response]) => response.제출제외 !== true).flatMap(([department, response]) => {
+      return cases.flatMap((item) => Object.entries(item.과별회신 || {}).flatMap(([department, response]) => {
         const rows = response.행?.length ? response.행 : [{ 메모: response.메모 || "" }];
         return rows.map((row) => ({ 문항ID: item.id, 의원문항: `${item.의원 || ""} ${item.문항번호 || ""}`.trim(), 요구내용: item.요구내용, 회신과: department, ...row, 확인필요: (response.확인필요 || []).map((entry) => entry.내용 || entry).join(" / ") }));
       }));
@@ -53,11 +53,11 @@
       const items = db.cases.filter((item) => ["회신중", "회신완료", "보완요청", "확정"].includes(item.상태));
       caseList.innerHTML = items.length ? items.map((item) => {
         const replies = Object.entries(item.과별회신 || {});
-        const includedReplies = replies.filter(([, response]) => response.제출제외 !== true);
         const issues = replies.flatMap(([department, response]) => (response.확인필요 || []).map((entry) => `${department}: ${entry.내용 || entry}`));
         const supplementOptions = replies.map(([department]) => `<option>${escapeHtml(department)}</option>`).join("");
-        const replyManager = replies.map(([department, response]) => `<div class="reply-row ${response.제출제외 ? "excluded" : ""}" data-department="${escapeHtml(department)}"><div><b>${escapeHtml(department)}</b><div class="meta">${escapeHtml(response.파일명 || "메모 회신")} · ${(response.행 || []).length}행</div>${response.제출제외 ? `<div class="excluded-note">제출본 제외: ${escapeHtml(response.제출제외사유 || "사유 없음")}</div>` : ""}</div><input class="exclude-reason" placeholder="제출본 제외 사유" value="${escapeHtml(response.제출제외 ? response.제출제외사유 || "" : "")}">${response.제출제외 ? '<button class="button restore-reply" type="button">다시 포함</button>' : '<button class="button danger exclude-reply" type="button">제출본 제외</button>'}</div>`).join("");
-        return `<article class="case" data-id="${escapeHtml(item.id)}"><div class="case-head"><div><h3>${escapeHtml(item.의원)} ${escapeHtml(item.문항번호)}번 · ${escapeHtml(item.요구내용)}</h3><div class="meta">회신 ${replies.length}/${1 + (item.협조과 || []).length}과 · 제출본 포함 ${includedReplies.length}과${issues.length ? ` · 확인필요 ${issues.length}건` : ""}</div>${issues.map((value) => `<span class="issue">${escapeHtml(value)}</span>`).join("")}</div><span class="badge">${escapeHtml(item.상태)}</span></div><div class="reply-manager">${replyManager}</div><div class="case-controls"><textarea class="comment" placeholder="보완 사유 또는 확정 코멘트">${escapeHtml(item.확정코멘트 || "")}</textarea><select class="supplement-department"><option value="">회신 과 선택</option>${supplementOptions}</select><button class="button danger supplement" type="button" ${["회신중","회신완료"].includes(item.상태) ? "" : "disabled"}>보완요청</button><span></span><span></span><button class="button primary confirm-case" type="button" ${item.상태 === "회신완료" ? "" : "disabled"}>확인 완료</button></div></article>`;
+        const history = item.상태 === "확정" ? `<div class="meta">이전 확정: ${escapeHtml(item.확정코멘트 || "없음")} · 오류를 발견하면 회신 과와 보완 사유를 입력해 되돌릴 수 있습니다.</div>` : "";
+        const comment = item.상태 === "확정" ? "" : item.확정코멘트 || "";
+        return `<article class="case" data-id="${escapeHtml(item.id)}"><div class="case-head"><div><h3>${escapeHtml(item.의원)} ${escapeHtml(item.문항번호)}번 · ${escapeHtml(item.요구내용)}</h3><div class="meta">회신 ${replies.length}/${1 + (item.협조과 || []).length}과${issues.length ? ` · 확인필요 ${issues.length}건` : ""}</div>${history}${issues.map((value) => `<span class="issue">${escapeHtml(value)}</span>`).join("")}</div><span class="badge">${escapeHtml(item.상태)}</span></div><div class="case-controls"><textarea class="comment" placeholder="보완 사유 또는 확정 코멘트">${escapeHtml(comment)}</textarea><select class="supplement-department"><option value="">회신 과 선택</option>${supplementOptions}</select><button class="button danger supplement" type="button" ${["회신중","회신완료","확정"].includes(item.상태) ? "" : "disabled"}>보완요청</button><span></span><span></span><button class="button primary confirm-case" type="button" ${item.상태 === "회신완료" ? "" : "disabled"}>확인 완료</button></div></article>`;
       }).join("") : '<div class="empty">검토할 회신 문항이 없습니다.</div>';
     }
     function renderStatus() {
@@ -75,21 +75,11 @@
       const card = event.target.closest(".case"); if (!card) return;
       const comment = card.querySelector(".comment").value.trim();
       try {
-        if (event.target.matches(".exclude-reply")) {
-          const replyRow = event.target.closest(".reply-row");
-          const department = replyRow.dataset.department;
-          const reason = replyRow.querySelector(".exclude-reason").value.trim();
-          if (!reason) throw new Error("제출본에서 제외할 사유를 입력하세요.");
-          if (!confirm(`${department} 회신을 통합표와 제출본에서 제외합니다. 원본 기록은 보존됩니다. 계속하시겠습니까?`)) return;
-          await AppCommon.applyAction({ 작업: "회신제외", id: card.dataset.id, 과: department, 사유: reason }, organization);
-          showNotice(`${department} 회신을 제출본에서 제외했습니다.`);
-        } else if (event.target.matches(".restore-reply")) {
-          const department = event.target.closest(".reply-row").dataset.department;
-          await AppCommon.applyAction({ 작업: "회신복구", id: card.dataset.id, 과: department }, organization);
-          showNotice(`${department} 회신을 제출본에 다시 포함했습니다.`);
-        } else if (event.target.matches(".supplement")) {
+        if (event.target.matches(".supplement")) {
           const department = card.querySelector(".supplement-department").value;
           if (!department) throw new Error("보완을 요청할 과를 선택하세요.");
+          if (!comment) throw new Error("보완요청 사유를 입력하세요.");
+          if (card.querySelector(".badge").textContent === "확정" && !confirm("확정 상태를 보완요청으로 되돌립니다. 기존 확정과 회신 기록은 보존됩니다. 계속하시겠습니까?")) return;
           await AppCommon.applyAction({ 작업: "보완요청", id: card.dataset.id, 과: department, 사유: comment }, organization);
           showNotice(`${department}에 보완을 요청했습니다.`);
         } else if (event.target.matches(".confirm-case")) {
@@ -111,13 +101,13 @@
     document.querySelector("#exportExcel").addEventListener("click", () => {
       const cases = confirmedCases(); if (!cases.length) { showNotice("확정된 문항이 없습니다.", true); return; }
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(cases.map((item) => ({ 문항ID:item.id,위원회:item.위원회,의원:item.의원,문항번호:item.문항번호,요구내용:item.요구내용,주관과:item.주관과,협조과:(item.협조과||[]).join("|"),포함회신과:Object.entries(item.과별회신||{}).filter(([,response])=>response.제출제외!==true).map(([department])=>department).join("|"),제외회신과:Object.entries(item.과별회신||{}).filter(([,response])=>response.제출제외===true).map(([department])=>department).join("|"),확정코멘트:item.확정코멘트 }))), "제출목록");
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(cases.map((item) => ({ 문항ID:item.id,위원회:item.위원회,의원:item.의원,문항번호:item.문항번호,요구내용:item.요구내용,주관과:item.주관과,협조과:(item.협조과||[]).join("|"),확정코멘트:item.확정코멘트 }))), "제출목록");
       const used = new Set(["제출목록"]); cases.forEach((item, index) => { let name=`${index+1}_${item.의원||"문항"}_${item.문항번호||""}`.replace(/[\\/?*:[\]]/g,"_").slice(0,31); while(used.has(name)) name=`${name.slice(0,27)}_${used.size}`; used.add(name); XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(combinedRows([item])), name); });
       XLSX.writeFile(workbook, "국회요구자료_제출본.xlsx");
     });
     document.querySelector("#exportMarkdown").addEventListener("click", () => {
       const cases = confirmedCases(); if (!cases.length) { showNotice("확정된 문항이 없습니다.", true); return; }
-      const lines=["# 국회 요구자료 제출본",""]; cases.forEach((item,index)=>{ const excluded=Object.entries(item.과별회신||{}).filter(([,response])=>response.제출제외===true).map(([department,response])=>`${department}(${response.제출제외사유||"사유 없음"})`); lines.push(`## ${index+1}. ${item.의원||""} ${item.문항번호||""}번`,"",item.요구내용,"",`- 주관 과: ${item.주관과}`,`- 협조 과: ${(item.협조과||[]).join(", ")||"없음"}`,`- 제출본 제외 회신: ${excluded.join(", ")||"없음"}`,`- 확인 코멘트: ${item.확정코멘트}`,""); const rows=combinedRows([item]); if(rows.length){const keys=[...new Set(rows.flatMap(Object.keys))];lines.push(`| ${keys.join(" | ")} |`,`| ${keys.map(()=>"---").join(" | ")} |`,...rows.map(row=>`| ${keys.map(key=>String(row[key]??"").replace(/\|/g,"\\|").replace(/\n/g," ")).join(" | ")} |`),"");}}); const blob=new Blob(["\uFEFF"+lines.join("\n")],{type:"text/markdown;charset=utf-8"}); const link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download="국회요구자료_제출본.md";link.click();URL.revokeObjectURL(link.href);
+      const lines=["# 국회 요구자료 제출본",""]; cases.forEach((item,index)=>{ lines.push(`## ${index+1}. ${item.의원||""} ${item.문항번호||""}번`,"",item.요구내용,"",`- 주관 과: ${item.주관과}`,`- 협조 과: ${(item.협조과||[]).join(", ")||"없음"}`,`- 확인 코멘트: ${item.확정코멘트}`,""); const rows=combinedRows([item]); if(rows.length){const keys=[...new Set(rows.flatMap(Object.keys))];lines.push(`| ${keys.join(" | ")} |`,`| ${keys.map(()=>"---").join(" | ")} |`,...rows.map(row=>`| ${keys.map(key=>String(row[key]??"").replace(/\|/g,"\\|").replace(/\n/g," ")).join(" | ")} |`),"");}}); const blob=new Blob(["\uFEFF"+lines.join("\n")],{type:"text/markdown;charset=utf-8"}); const link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download="국회요구자료_제출본.md";link.click();URL.revokeObjectURL(link.href);
     });
     document.querySelector("#refresh").addEventListener("click",()=>refresh().catch((error)=>showNotice(error.message,true)));
     (async function initialize(){departments=(await AppCommon.loadCsv("data/A부_조직도_26개과.csv")).map((row)=>row.과);organization=departments.map((과)=>({과}));AppCommon.renderStorageMode();await refresh();})().catch((error)=>showNotice(error.message,true));
