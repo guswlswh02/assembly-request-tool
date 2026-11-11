@@ -188,6 +188,14 @@
     if (![item.주관과, ...(item.협조과 || [])].includes(department)) throw new FlowError(403, `${department}는 이 문항의 담당 과가 아닙니다.`);
     if (!item.과별회신?.[department]) throw new FlowError(400, `${department}의 기존 회신이 없어 보완을 요청할 수 없습니다.`);
     if (!reason) throw new FlowError(400, "보완요청에는 사유가 필요합니다.");
+    item.회신이력 ||= [];
+    item.회신이력.push({
+      과: department,
+      ...copy(item.과별회신[department]),
+      보완요청일시: timestamp,
+      보완사유: reason,
+    });
+    delete item.과별회신[department];
     if (item.상태 === STATUS.CONFIRMED) {
       item.확정해제이력 ||= [];
       item.확정해제이력.push({ 과: department, 사유: reason, 이전코멘트: cleanText(item.확정코멘트), 일시: timestamp });

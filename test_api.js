@@ -93,6 +93,9 @@ async function main() {
     작업: "보완요청", id: "TEST-01", 과: "운영지원과", 사유: "합계 확인 필요",
   }, 200);
   assert.equal(supplement.body.상태, "보완요청");
+  assert.equal(supplement.body.문항.과별회신.운영지원과, undefined);
+  assert.equal(supplement.body.문항.회신이력.length, 1);
+  assert.equal(supplement.body.문항.회신이력[0].보완사유, "합계 확인 필요");
   await check("보완 대상 아닌 과 회신", "POST", {
     작업: "회신", id: "TEST-01", 과: "디지털정책과", 메모: "재회신",
   }, 403);
@@ -109,6 +112,8 @@ async function main() {
   assert.equal(confirmed.body.문항.확정이력.length, 1);
   const reopened = await check("확정 뒤 보완요청", "POST", { 작업: "보완요청", id: "TEST-01", 과: "운영지원과", 사유: "확정 후 오류 발견" }, 200);
   assert.equal(reopened.body.상태, "보완요청");
+  assert.equal(reopened.body.문항.과별회신.운영지원과, undefined);
+  assert.equal(reopened.body.문항.회신이력.length, 2);
   assert.equal(reopened.body.문항.확정해제이력.length, 1);
   assert.equal(reopened.body.문항.확정해제이력[0].이전코멘트, "확인 완료");
   const revisedAgain = await check("확정 뒤 보완 회신", "POST", { 작업: "회신", id: "TEST-01", 과: "운영지원과", 메모: "최종 수정 회신" }, 200);

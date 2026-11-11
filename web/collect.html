@@ -36,8 +36,11 @@
     const registryResult = document.querySelector("#registryResult");
     let db = { cases: [], log: [] }, departments = [], organization = [], statusChart, departmentChart;
     function showNotice(message, error = false) { notice.hidden = !message; notice.textContent = message; notice.classList.toggle("error", error); }
+    function isPendingSupplement(item, department) {
+      return [...(item.보완 || [])].reverse().some((entry) => entry.과 === department && !entry.해결);
+    }
     function combinedRows(cases = db.cases) {
-      return cases.flatMap((item) => Object.entries(item.과별회신 || {}).flatMap(([department, response]) => {
+      return cases.flatMap((item) => Object.entries(item.과별회신 || {}).filter(([department]) => !isPendingSupplement(item, department)).flatMap(([department, response]) => {
         const rows = response.행?.length ? response.행 : [{ 메모: response.메모 || "" }];
         return rows.map((row) => ({ 문항ID: item.id, 의원문항: `${item.의원 || ""} ${item.문항번호 || ""}`.trim(), 요구내용: item.요구내용, 회신과: department, ...row, 확인필요: (response.확인필요 || []).map((entry) => entry.내용 || entry).join(" / ") }));
       }));
@@ -52,7 +55,7 @@
     function renderCases() {
       const items = db.cases.filter((item) => ["회신중", "회신완료", "보완요청", "확정"].includes(item.상태));
       caseList.innerHTML = items.length ? items.map((item) => {
-        const replies = Object.entries(item.과별회신 || {});
+        const replies = Object.entries(item.과별회신 || {}).filter(([department]) => !isPendingSupplement(item, department));
         const issues = replies.flatMap(([department, response]) => (response.확인필요 || []).map((entry) => `${department}: ${entry.내용 || entry}`));
         const supplementOptions = replies.map(([department]) => `<option>${escapeHtml(department)}</option>`).join("");
         const history = item.상태 === "확정" ? `<div class="meta">이전 확정: ${escapeHtml(item.확정코멘트 || "없음")} · 오류를 발견하면 회신 과와 보완 사유를 입력해 되돌릴 수 있습니다.</div>` : "";
